@@ -3,23 +3,36 @@ package com.personalgainz.finance.bills;
 // LocalDate is used to stores dates ("2025-11-15")
 import java.time.LocalDate;
 
+// Importing necessary Spring and JPA annotations
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 
 /**
  * This class represents ONE bill
  * Each object of this class is a single bill entry
  */
+
+
+@Entity
 public class Bill {
     
     // Fields representing the attributes of a bill
-    private Long id;
-    private Long userId;
-    private String name;
-    private double amount;
-    private LocalDate dueDate;
-    private String category;
-    private boolean autoPay;
-    private boolean paid;
-    private String notes;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;                // Primary Key (auto-generated)
+
+    private Long userId;            // ID of the user who owns this bill
+    private String name;            // Name of the bill (e.g., "Electric Bill")
+    private double amount;          // Amount due for the bill
+    private LocalDate dueDate;      // Due date for the bill payment
+    private String category;        // Category of the bill (e.g., "Utilities")
+    private boolean autoPay;        // Whether the bill is set for auto payment
+    private boolean paid;           // Whether the bill has been paid
+    private String notes;           // Additional notes about the bill (optional)
 
     // Constructors
 
