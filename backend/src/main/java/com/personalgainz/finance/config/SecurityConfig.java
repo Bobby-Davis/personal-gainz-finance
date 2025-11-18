@@ -15,10 +15,12 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
+
                 // allow all /api/** requests with no login (for now)
-                .requestMatchers("/api/**").permitAll()
+                //.requestMatchers("/api/**").permitAll()
                 // anything else (like /, /login) still uses the default security
-                .anyRequest().authenticated()
+                //.anyRequest().authenticated()
             );
 
         return http.build();
