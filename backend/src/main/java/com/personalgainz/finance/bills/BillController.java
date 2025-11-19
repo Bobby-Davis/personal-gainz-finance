@@ -3,9 +3,13 @@ package com.personalgainz.finance.bills;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -29,6 +33,21 @@ public class BillController {
         return billRepository.findAll();
     }
 
+    @GetMapping("/api/bills/{id}")
+    public ResponseEntity<Bill> getBillbyId(@PathVariable Long id) {
+        
+        // Ask the repository to find a Bill with the given ID
+        Optional<Bill> optionalBill = billRepository.findById(id);
+
+        // If found, return 200 OK + the Bill
+        if (optionalBill.isPresent()) {
+            return ResponseEntity.ok(optionalBill.get());
+        }
+
+        // If not found, return 404 Not Found
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/api/bills")
     public Bill createBill(@RequestBody Bill newBill) {
 
@@ -41,6 +60,43 @@ public class BillController {
         // Return the saved bill
         return saved;
     }
+
+    @PutMapping("/api/bills/{id}")
+    public ResponseEntity<Bill> updateBill(
+                @PathVariable Long id,
+                @RequestBody Bill updatedBillDetails) {
+
+        // Look up the existing bill by ID
+        Optional<Bill> optionalBill = billRepository.findById(id);
+
+        if(optionalBill.isEmpty()) {
+            // If not found, return 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
+
+        Bill existingBill = optionalBill.get();
+
+        // Copy over fields from the updated details to the existing bill
+        existingBill.setUserId(updatedBillDetails.getUserId());
+        existingBill.setName(updatedBillDetails.getName());
+        existingBill.setAmount(updatedBillDetails.getAmount());
+        existingBill.setDueDate(updatedBillDetails.getDueDate());
+        existingBill.setCategory(updatedBillDetails.getCategory());
+        existingBill.setAutoPay(updatedBillDetails.isAutoPay());
+        existingBill.setPaid(updatedBillDetails.isPaid());
+        existingBill.setNotes(updatedBillDetails.getNotes());
+
+        // Save the updated bill back to the database
+        Bill savedBill = billRepository.save(existingBill);
+
+        // Return 200 OK + the saved bill
+        return ResponseEntity.ok(savedBill);
+
+    }
+
+
+
+    
     
 }
     
