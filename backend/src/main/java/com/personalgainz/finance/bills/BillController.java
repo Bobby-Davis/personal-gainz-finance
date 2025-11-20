@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -94,6 +95,22 @@ public class BillController {
 
     }
 
+    @DeleteMapping("/api/bills/{id}")
+    public ResponseEntity<Void> deleteBill(@PathVariable Long id) {
+
+        // Check if the bill exists
+        Optional<Bill> optionalBill = billRepository.findById(id);
+        if (optionalBill.isEmpty()) {
+            // If not found, return 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
+
+        // Delete the bill
+        billRepository.deleteById(id);
+
+        // Return 204 No Content to indicate successful deletion
+        return ResponseEntity.noContent().build();
+    }
 
 
     
