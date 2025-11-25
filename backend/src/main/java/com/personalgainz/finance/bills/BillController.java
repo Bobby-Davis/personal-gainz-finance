@@ -17,28 +17,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 public class BillController {
-
-    private final BillRepository billRepository;
-
-    // constructor injection:
-    // Spring will automatically provide an instance of BillRepository
+    
+    private final BillsService billService;
+    
+    // constructor injection
+    // Spring will automatically provide an instance of BillsService
     // when it creates an instance of BillController
-    public BillController(BillRepository billRepository) {
-        this.billRepository = billRepository;
+    public BillController(BillsService billService) {
+        // Assign the injected BillsService to the local field
+        this.billService = billService;
     }
 
+    
     @GetMapping("/api/bills")
     public List<Bill> getBills() {
         
         // Fetch all bills from the database
-        return billRepository.findAll();
+        return billService.getAllBills();
     }
 
     @GetMapping("/api/bills/{id}")
     public ResponseEntity<Bill> getBillbyId(@PathVariable Long id) {
         
         // Ask the repository to find a Bill with the given ID
-        Optional<Bill> optionalBill = billRepository.findById(id);
+        Optional<Bill> optionalBill = billService.getBillById(id);
 
         // If found, return 200 OK + the Bill
         if (optionalBill.isPresent()) {
@@ -50,70 +52,49 @@ public class BillController {
     }
 
     @PostMapping("/api/bills")
-    public Bill createBill(@RequestBody Bill newBill) {
+    public ResponseEntity<Bill> createBill(@RequestBody Bill newBill) {
 
-        // Make sure the ID is null so JPA knows this is a new row
-        newBill.setId(null); 
-
-        // Save the new bill to the database
-        Bill saved = billRepository.save(newBill);
+        // delegate to the service to create the new bill
+        Bill saved = billService.createBill(newBill);
 
         // Return the saved bill
-        return saved;
+        return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/api/bills/{id}")
     public ResponseEntity<Bill> updateBill(
+                // this annotation tells Spring to extract the "id" from the URL path
                 @PathVariable Long id,
+                // this annotation tells Spring to read the request body and convert it to a Bill object
                 @RequestBody Bill updatedBillDetails) {
 
-        // Look up the existing bill by ID
-        Optional<Bill> optionalBill = billRepository.findById(id);
+        // ask the service to update the bill
+        Optional<Bill> optionalBill = billService.updateBill(id, updatedBillDetails);
 
         if(optionalBill.isEmpty()) {
             // If not found, return 404 Not Found
             return ResponseEntity.notFound().build();
         }
 
-        Bill existingBill = optionalBill.get();
-
-        // Copy over fields from the updated details to the existing bill
-        existingBill.setUserId(updatedBillDetails.getUserId());
-        existingBill.setName(updatedBillDetails.getName());
-        existingBill.setAmount(updatedBillDetails.getAmount());
-        existingBill.setDueDate(updatedBillDetails.getDueDate());
-        existingBill.setCategory(updatedBillDetails.getCategory());
-        existingBill.setAutoPay(updatedBillDetails.isAutoPay());
-        existingBill.setPaid(updatedBillDetails.isPaid());
-        existingBill.setNotes(updatedBillDetails.getNotes());
-
-        // Save the updated bill back to the database
-        Bill savedBill = billRepository.save(existingBill);
-
         // Return 200 OK + the saved bill
-        return ResponseEntity.ok(savedBill);
+        return ResponseEntity.ok(optionalBill.get());
 
     }
 
     @DeleteMapping("/api/bills/{id}")
     public ResponseEntity<Void> deleteBill(@PathVariable Long id) {
 
-        // Check if the bill exists
-        Optional<Bill> optionalBill = billRepository.findById(id);
-        if (optionalBill.isEmpty()) {
-            // If not found, return 404 Not Found
+        // Ask the service to delete the bill
+        boolean deleted = billService.deleteBill(id);
+
+        if (!deleted) {
+            // Service couldn't delete because the bill was not found
             return ResponseEntity.notFound().build();
         }
-
-        // Delete the bill
-        billRepository.deleteById(id);
 
         // Return 204 No Content to indicate successful deletion
         return ResponseEntity.noContent().build();
     }
-
-
-    
     
 }
     
