@@ -1,25 +1,18 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import BillsList from './components/BillsList';
+import Dashboard from "./pages/Dashboard";
 
-// app component serves as the main entry point for the PersonalGainz Finance frontend application
+// Main application component
 function App() {
-  // shows the main application structure
   return (
     <div style={{ 
+      backgroundColor: "#095b66ff",
       minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      }}
-    >
-      <h1>PersonalGainz Finance</h1>
-      <BillsList />
-    </div>    
+      color: "#f9fafb",
+      width: "100%",
+      }}>
+      <Dashboard />
+    </div>
   );
 }
 
-export default App
+// Export the App component as the default export
+export default App;
